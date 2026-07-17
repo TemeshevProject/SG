@@ -4,31 +4,31 @@
 
 ## Запуск на вашем компьютере
 
-Серверы в облаке агента **не доступны** по `localhost` на вашей машине — нужно запустить проект локально:
+**Агент не может запускать программы на вашем ПК** — только в облаке. Чтобы открыть `localhost`, запустите проект локально:
 
+### Windows — двойной клик
+`scripts\start-windows.bat`
+
+### Mac / Linux
 ```bash
-git clone https://github.com/TemeshevProject/SG.git
-cd SG
-git checkout cursor/apk-cost-calculator-4559
-
-# Один скрипт (backend + frontend)
+./scripts/start-mac.sh
+# или
 ./scripts/dev.sh
 ```
 
-Или в двух терминалах:
-
+### Вручную (два терминала)
 ```bash
-# Терминал 1 — API
+# Терминал 1
 cd backend && pip install -r requirements.txt
 PYTHONPATH=. uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
-# Терминал 2 — UI
+# Терминал 2
 cd frontend && npm install && npm run dev
 ```
 
 Откройте: **http://localhost:5173**
 
-> Excel-файлы спецификаций должны лежать в `drive-input/` для импорта BOM (`python3 scripts/import_bom.py`). Справочники цен и шаблоны BOM уже в репозитории.
+Нужны: [Python 3](https://python.org) и [Node.js](https://nodejs.org).
 
 ## Структура
 
