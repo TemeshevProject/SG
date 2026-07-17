@@ -2,21 +2,33 @@
 
 Платформа-конструктор для расчёта спецификации и себестоимости аппаратно-программного комплекса.
 
-## Запуск
+## Запуск на вашем компьютере
+
+Серверы в облаке агента **не доступны** по `localhost` на вашей машине — нужно запустить проект локально:
 
 ```bash
-# Backend (порт 8000)
-cd backend && PYTHONPATH=. uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+git clone https://github.com/TemeshevProject/SG.git
+cd SG
+git checkout cursor/apk-cost-calculator-4559
 
-# Frontend (порт 5173)
-cd frontend && npm run dev
+# Один скрипт (backend + frontend)
+./scripts/dev.sh
 ```
 
-Импорт BOM из Excel (при обновлении спецификаций):
+Или в двух терминалах:
 
 ```bash
-python3 scripts/import_bom.py
+# Терминал 1 — API
+cd backend && pip install -r requirements.txt
+PYTHONPATH=. uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
+# Терминал 2 — UI
+cd frontend && npm install && npm run dev
 ```
+
+Откройте: **http://localhost:5173**
+
+> Excel-файлы спецификаций должны лежать в `drive-input/` для импорта BOM (`python3 scripts/import_bom.py`). Справочники цен и шаблоны BOM уже в репозитории.
 
 ## Структура
 
