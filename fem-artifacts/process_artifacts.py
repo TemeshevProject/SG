@@ -24,6 +24,16 @@ OPEX_SHEETS = re.compile(
     r"(экспл|обсл|opex|5\.\s*экспл|6\.\s*обсл|7\.\s*opex|8\.\s*opex|4\.\s*opex)",
     re.I,
 )
+FOT_SHEETS = re.compile(r"фот", re.I)
+FOT_CATEGORY = "Затраты по заработной плате"
+
+FOT_EXCLUDE = re.compile(
+    r"(зал\s+совещан|гардероб|комната\s+(прием|ожидан|отдыха)|туалет|кладов|"
+    r"площадь\s+для\s+размещ|итого\s+потреб|расчет\s+общих|"
+    r"^наименование$|кв\.?\s*метр|фот,?\s*тенге|оклад\s+с\s+учетом|"
+    r"^должность$|необходимое\s+количество\s+часов)",
+    re.I,
+)
 
 CAPEX_CATEGORIES = {
     "аппаратно-программные комплексы",
@@ -118,6 +128,8 @@ def should_add_missing(data):
         return False
 
     if typ == "OPEX":
+        if data.get("kind") == "fot":
+            return count >= 2 or len(n) >= 10
         if OPEX_WHITELIST.search(name):
             return True
         if count >= 4 and len(n) >= 20:
@@ -235,6 +247,90 @@ def extract_from_sheet(ws, sheet_name, fem_name, sheet_type):
     return results
 
 
+def normalize_fot_position(name):
+    n = norm(name)
+    replacements = {
+        "директора филиала": "директор филиала",
+        "инженер конроля качества": "инженер контроля качества",
+        "менеджер  по технике безопасности": "менеджер по технике безопасности",
+        "бухгалтер": "бухгалтер",
+        "директор филиала": "директор филиала",
+        "технический директор": "технический директор",
+    }
+    for old, new in replacements.items():
+        if n == old:
+            return new
+    return n
+
+
+FOT_DISPLAY_NAMES = {
+    "директор филиала": "Директор филиала",
+    "инженер контроля качества": "Инженер контроля качества",
+    "менеджер по технике безопасности": "Менеджер по технике безопасности",
+}
+
+
+def is_fot_position_row(ws, row, name_col=1):
+    name = ws.cell(row, name_col).value
+    if not name or not str(name).strip():
+        return False
+    name_s = str(name).strip()
+    if FOT_EXCLUDE.search(name_s):
+        return False
+    if not re.search(r"[а-яa-z]", name_s, re.I):
+        return False
+    if EXCLUDE_NAMES.search(norm(name_s)):
+        return False
+
+    qty = ws.cell(row, name_col + 1).value
+    salary = ws.cell(row, name_col + 2).value
+    if isinstance(qty, (int, float)) or isinstance(salary, (int, float)):
+        return True
+    return False
+
+
+def extract_fot_from_sheet(ws, sheet_name, fem_name):
+    results = []
+    in_payroll_block = False
+    stop_block = False
+
+    for r in range(1, min(ws.max_row, 250) + 1):
+        row_text = " ".join(
+            str(ws.cell(r, c).value).lower()
+            for c in range(1, 6)
+            if ws.cell(r, c).value is not None
+        )
+        if "площадь для размещения сотрудников" in row_text:
+            stop_block = True
+        if "расчет общих операционных издержек" in row_text:
+            break
+        if "должность" in row_text and "кол" in row_text:
+            in_payroll_block = True
+            stop_block = False
+            continue
+        if stop_block:
+            continue
+        if not in_payroll_block:
+            continue
+        if not is_fot_position_row(ws, r, name_col=1):
+            continue
+
+        name_s = str(ws.cell(r, 1).value).strip()
+        canonical = normalize_fot_position(name_s)
+        display_name = FOT_DISPLAY_NAMES.get(canonical, name_s.strip())
+        results.append(
+            {
+                "category": FOT_CATEGORY,
+                "name": display_name,
+                "canonical": canonical,
+                "type": "OPEX",
+                "kind": "fot",
+                "source": f"{fem_name}::{sheet_name}",
+            }
+        )
+    return results
+
+
 def extract_historical():
     all_items = []
     for path in sorted(HIST_DIR.glob("*.xlsx")):
@@ -245,6 +341,10 @@ def extract_historical():
             continue
         for sheet_name in wb.sheetnames:
             st = None
+            if FOT_SHEETS.search(sheet_name):
+                ws = wb[sheet_name]
+                all_items.extend(extract_fot_from_sheet(ws, sheet_name, path.name))
+                continue
             if CAPEX_SHEETS.search(sheet_name):
                 st = "CAPEX"
             elif OPEX_SHEETS.search(sheet_name):
@@ -285,19 +385,21 @@ def load_main_artifacts():
 def aggregate_historical(items):
     agg = {}
     for it in items:
-        key = norm(it["name"])
+        key = it.get("canonical") or norm(it["name"])
         if key not in agg:
+            display = it["name"]
+            if it.get("canonical"):
+                display = FOT_DISPLAY_NAMES.get(it["canonical"], it["name"])
             agg[key] = {
                 "category": it["category"],
-                "name": it["name"],
+                "name": display,
                 "type": it["type"],
+                "kind": it.get("kind"),
                 "sources": set(),
                 "count": 0,
             }
         agg[key]["sources"].add(it["source"])
         agg[key]["count"] += 1
-        if agg[key]["count"] < agg[key]["count"]:  # pragma: no cover
-            pass
     return agg
 
 
@@ -355,6 +457,8 @@ def names_match(a, b):
         ("настройка пуско-наладка", "монтаж и запуск серверов"),
         ("затраты на электроэнергию", "стоимость электроэнергии"),
         ("непредвиденные работы", "непредвиденные работы"),
+        ("директора филиала", "директор филиала"),
+        ("инженер конроля качества", "инженер контроля качества"),
     ]
     for x, y in aliases:
         if (x in na and y in nb) or (x in nb and y in na):
@@ -445,6 +549,8 @@ def build_workbook(main_wb, main_rows, missing):
             cat = "Аренда каналов связи"
         elif data["type"] == "OPEX" and "обслуж" in cat_norm:
             cat = "Обслуживание АПК" if "апк" in norm(data["name"]) else "Услуги сторонних организаций"
+        elif data.get("kind") == "fot":
+            cat = FOT_CATEGORY
         elif data["type"] == "OPEX" and any(x in norm(data["name"]) for x in ["гсм", "канц", "хоз", "охрана", "клининг", "билет", "проживание", "суточн"]):
             cat = "Экономические предположения"
         elif data["type"] == "CAPEX" and any(x in norm(data["name"]) for x in ["монтаж", "креплен", "навеск", "интеграц"]):
@@ -464,6 +570,7 @@ def build_workbook(main_wb, main_rows, missing):
             "category": cat,
             "name": data["name"],
             "type": data["type"],
+            "kind": data.get("kind"),
             "unit": None,
             "price": None,
             "qty_supplier": None,
@@ -536,6 +643,7 @@ def main():
         "added": len(added),
         "added_capex": sum(1 for x in added if x["type"] == "CAPEX"),
         "added_opex": sum(1 for x in added if x["type"] == "OPEX"),
+        "added_fot": sum(1 for x in added if x.get("category") == FOT_CATEGORY),
         "total_after": len(all_rows),
         "capex_total": sum(1 for x in all_rows if x["type"] == "CAPEX"),
         "opex_total": sum(1 for x in all_rows if x["type"] == "OPEX"),
