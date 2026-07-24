@@ -1,0 +1,591 @@
+{
+  "meta": {
+    "segment": "P",
+    "manufacturer": "Hikvision",
+    "apk_version": "4.0",
+    "currency": "KZT",
+    "price_column": "I",
+    "source": "user_screenshots_2026-07-17",
+    "fields": [
+      "description",
+      "name",
+      "unit_price_kzt"
+    ]
+  },
+  "items": [
+    {
+      "bom_row": 1,
+      "description": "Камера варифокальная",
+      "name": "Камера варифокальная iDS-2CD7A45G0-IZS(4.7-118mm), Hikvision",
+      "unit": "шт",
+      "unit_price_kzt": 135000
+    },
+    {
+      "bom_row": 2,
+      "description": "Камера обзорная/светофорная фиксированная",
+      "name": "Камера DS-2CD1643G2-IZ(2.8-12mm)(O-STD), Hikvision",
+      "unit": "шт",
+      "unit_price_kzt": 37500
+    },
+    {
+      "bom_row": 3,
+      "description": "Монтажная коробка для фиксированной камеры",
+      "name": "Коробка монтажная DS-1260ZJ, Hikvision",
+      "unit": "шт",
+      "unit_price_kzt": 4100
+    },
+    {
+      "bom_row": 4,
+      "description": "Кронштейн монтажной коробки для крепления к столбу",
+      "name": "Кронштейн DS-1275ZJ-SUS, Hikvision",
+      "unit": "шт",
+      "unit_price_kzt": 7100
+    },
+    {
+      "bom_row": 5,
+      "description": "",
+      "name": "Кронштейн DS-1232ZJ-T, Hikvision",
+      "unit": "шт",
+      "unit_price_kzt": 3200
+    },
+    {
+      "bom_row": 6,
+      "description": "Кронштейн крепления для варифокальной",
+      "name": "Кронштейн DS-1275ZJ-SUS, Hikvision",
+      "unit": "шт",
+      "unit_price_kzt": 7100
+    },
+    {
+      "bom_row": 7,
+      "description": "Точка доступа для связи между столбами",
+      "name": "Точка доступа wAP 60G AP RBwAPG-60ad-A, MikroTik",
+      "unit": "шт",
+      "unit_price_kzt": 135000
+    },
+    {
+      "bom_row": 8,
+      "description": "Камера высокого разрешения (краб в комплекте)",
+      "name": "iDS-TCV900-BI(F)/1140/H1(AF)(O-STD) \npart number 305002721",
+      "unit": "шт",
+      "unit_price_kzt": 965000
+    },
+    {
+      "bom_row": 9,
+      "description": "ИК стробоскоп",
+      "name": "ИК стробоскоп SL-1211-1I(850nm)(AC220V)(O-STD)\npart number 305200184",
+      "unit": "шт",
+      "unit_price_kzt": 160000
+    },
+    {
+      "bom_row": 10,
+      "description": "Выносной кроштейн (для камеры и ИК)",
+      "name": "Выносной кроштейн DS-1701ZJ/HWB\npart number 307500079",
+      "unit": "шт",
+      "unit_price_kzt": 25000
+    },
+    {
+      "bom_row": 11,
+      "description": "Крепление на столб (для камеры и ИК)",
+      "name": "Кронштейн для крепления на столб DS-1275ZJ-HWB/600 мм\npart number 307500076",
+      "unit": "шт",
+      "unit_price_kzt": 16500
+    },
+    {
+      "bom_row": 12,
+      "description": "Автоматический выключатель 1-полюсной",
+      "name": "Автоматический выключатель iC60N C 25A 1P A9F79125, Schneider Electric",
+      "unit": "шт",
+      "unit_price_kzt": 5300
+    },
+    {
+      "bom_row": 13,
+      "description": "Кабель ВВГ 2х2.5",
+      "name": "Кабель ВВГ 2х2.5",
+      "unit": "м",
+      "unit_price_kzt": 527
+    },
+    {
+      "bom_row": 14,
+      "description": "Шкаф уличной системы видеонаблюдения навесной на столб с крепежной фурнитурой Размеры: 610х440х295;\nЦвет покрытия: RAL7035 шагрень, цинкосодержащая грунтовка;\nЗамок: распорный не ниже IP55;\nВерхний отсек:  утеплен пеноплексом по типу термоса, без точек россы. 340х260х200;\nНижний отсек: без утеплителя 440х280х280\nТри отверстия с сальниками PG29, одно с сальником PG21, два отверстия диаметром 21мм под PG13.5\nЗапрещено использовать навесы из дюралюминия",
+      "name": "Шкаф АПК Сергек металлический  V3.11",
+      "unit": "шт",
+      "unit_price_kzt": 84400
+    },
+    {
+      "bom_row": 15,
+      "description": "Лента самовулканизирующаяся (битумный скотч)",
+      "name": "Лента самовулканизирующаяся (битумный скотч)",
+      "unit": "м",
+      "unit_price_kzt": 2750
+    },
+    {
+      "bom_row": 16,
+      "description": "Зажим для подключения проводов питания к пленочному нагревателю",
+      "name": "Зажим КП для монтажа пленочного теплого тола, Теплолюкс",
+      "unit": "шт",
+      "unit_price_kzt": 200
+    },
+    {
+      "bom_row": 17,
+      "description": "Размеры: 120x120x25мм; \nНоминальное напряжение: DC 48V;\nПоток воздуха не менее 120CFM;\nКомплект крепежных элементов;",
+      "name": "Вентилятор осевой  G1238-D48X-7PBHL, Silart",
+      "unit": "шт",
+      "unit_price_kzt": 9870
+    },
+    {
+      "bom_row": 18,
+      "description": "Инфракрасная нагревательная пленка",
+      "name": "Пленка нагревательная, мощность 130Вт/кв.м. Ширина: 0,5м; Длинна: 0,25м, Global Heating",
+      "unit": "шт",
+      "unit_price_kzt": 2300
+    },
+    {
+      "bom_row": 19,
+      "description": "Фольгированный экран нагревателя",
+      "name": "Фольгированный полистирол (подложка под теплый пол) толщина 3 мм",
+      "unit": "кв.м",
+      "unit_price_kzt": 365
+    },
+    {
+      "bom_row": 20,
+      "description": "Дюбель для крепления к гипсокартонным листам",
+      "name": "Пластиковый дюбель DRIVA 15x32 со сверлом",
+      "unit": "шт",
+      "unit_price_kzt": 10
+    },
+    {
+      "bom_row": 21,
+      "description": "Фильтр воздушный автомобильный",
+      "name": "Фильтр воздушный 16546-9466R, Nissan",
+      "unit": "шт",
+      "unit_price_kzt": 5500
+    },
+    {
+      "bom_row": 22,
+      "description": "Диапазоны: 0...60°C; Крепление: DIN 35мм; Габаритные размеры: 60×33×43 мм; Максимальный пусковой ток: ~10 А;",
+      "name": "Термостат NС (обогрев) 10А 230В SQ0832-00, TDM",
+      "unit": "шт",
+      "unit_price_kzt": 1800
+    },
+    {
+      "bom_row": 23,
+      "description": "Аккумуляторный блок",
+      "name": "LiFePo4 HW-16F25 15s1p Grade-A 48V 25Ah BMS-20A, Howell Energy",
+      "unit": "шт",
+      "unit_price_kzt": 155440
+    },
+    {
+      "bom_row": 24,
+      "description": "Зарядное устройство",
+      "name": "Зарядное устройство 54,75V 10A UY600-WF-48-10-1",
+      "unit": "шт",
+      "unit_price_kzt": 49000
+    },
+    {
+      "bom_row": 25,
+      "description": "Преобразователь PoE 48В в 24В, MikroTik",
+      "name": "Проеобразователь PoE в 24В RBGPOE-CON-HP, MikroTik",
+      "unit": "шт",
+      "unit_price_kzt": 16000
+    },
+    {
+      "bom_row": 26,
+      "description": "Преобразователь 48V-52V, 4.2A",
+      "name": "Изолированный DC-DC преобразователь SD-200C-48, Mean Well",
+      "unit": "шт",
+      "unit_price_kzt": 50000
+    },
+    {
+      "bom_row": 27,
+      "description": "Автоматический переключатель фаз 16А с регулировкой напряжения переключения",
+      "name": "Переключатель фаз автоматический PF-451, Евроавтоматика ФиФ",
+      "unit": "шт",
+      "unit_price_kzt": 26670
+    },
+    {
+      "bom_row": 28,
+      "description": "Автоматический выключатель 1-полюсной",
+      "name": "Выключатель Автоматический 6А С A9F79106, Schneider Electric",
+      "unit": "шт",
+      "unit_price_kzt": 6400
+    },
+    {
+      "bom_row": 29,
+      "description": "Зажим для подключения к линии питания",
+      "name": "Зажим ответвительный прокалывающий  P2X-95.1, ИнсталлГрупп",
+      "unit": "шт",
+      "unit_price_kzt": 750
+    },
+    {
+      "bom_row": 30,
+      "description": "Фильтр подавления ЭМС 3 фазный",
+      "name": "Трехфазный сетевой фильтр DL-5EAX1, Jianli",
+      "unit": "шт",
+      "unit_price_kzt": 13500
+    },
+    {
+      "bom_row": 31,
+      "description": "Устройство защиты от импульсных перенапряжений",
+      "name": "Разрядник ОПС1-D 1Р SQ0201-0009, TDM",
+      "unit": "шт",
+      "unit_price_kzt": 5000
+    },
+    {
+      "bom_row": 32,
+      "description": "Шина изолированная с креплением на DIN рейку",
+      "name": "Шина ШНИ-8х12-8-КС-С, IEK",
+      "unit": "шт",
+      "unit_price_kzt": 800
+    },
+    {
+      "bom_row": 33,
+      "description": "Провод электрический ШВВП 2х0,75",
+      "name": "Провод электрический ШВВП 2х0,75",
+      "unit": "м",
+      "unit_price_kzt": 157
+    },
+    {
+      "bom_row": 34,
+      "description": "Кабель медный одножильный ВВГ 4x2,5",
+      "name": "Кабель ВВГ 4х2,5(ож), ГОСТ 31996-2012",
+      "unit": "м",
+      "unit_price_kzt": 988
+    },
+    {
+      "bom_row": 35,
+      "description": "Провод ПуВ 1x2,5 медный одножильный для монтажа внутри шкафа",
+      "name": "Провод ПуВ 1х2,5 медный",
+      "unit": "м",
+      "unit_price_kzt": 243
+    },
+    {
+      "bom_row": 36,
+      "description": "Скотч двухсторонний для крепления компоннетов шкафа",
+      "name": "Монтажная лента 3M PT1100 19мм x 20м",
+      "unit": "шт",
+      "unit_price_kzt": 26500
+    },
+    {
+      "bom_row": 37,
+      "description": "Саморез для крепления DIN-рейки и ЭМС фильтра",
+      "name": "Саморез 4.2х16 мм с прессшайбой оцинкованный со сверлом",
+      "unit": "шт",
+      "unit_price_kzt": 1
+    },
+    {
+      "bom_row": 38,
+      "description": "Кабельный ввод PG 13,5 с гайкой",
+      "name": "Сальник PG 13,5, IEK",
+      "unit": "шт",
+      "unit_price_kzt": 91
+    },
+    {
+      "bom_row": 39,
+      "description": "Кабельный ввод PG 21с гайкой",
+      "name": "Сальник PG 21, IEK",
+      "unit": "шт",
+      "unit_price_kzt": null
+    },
+    {
+      "bom_row": 40,
+      "description": "Кабельный ввод PG 29 с гайкой",
+      "name": "Сальник PG 29, IEK",
+      "unit": "шт",
+      "unit_price_kzt": null
+    },
+    {
+      "bom_row": 41,
+      "description": "Мониторинг питания с интеграцией со светофором",
+      "name": "Мониторинг состояния коммутационного шкафа Specto B, Sergek Development Ltd.",
+      "unit": "шт",
+      "unit_price_kzt": 172000
+    },
+    {
+      "bom_row": 42,
+      "description": "Мониторинг состояния светофора",
+      "name": "Мониторинг состояния светофора Specto A, Sergek Development Ltd.",
+      "unit": "шт",
+      "unit_price_kzt": 86000
+    },
+    {
+      "bom_row": 43,
+      "description": "Локально вычислительный модуль для обработки видео потока локально и возможности отправки отложенных событий",
+      "name": "Локально вычислительный модуль AvmNano",
+      "unit": "шт",
+      "unit_price_kzt": null
+    },
+    {
+      "bom_row": 44,
+      "description": "DIN-рейка 20см для автоматов и УЗИП",
+      "name": "DIN-рейка оцинкованная с перфорацией 20см, IEK",
+      "unit": "шт",
+      "unit_price_kzt": 163
+    },
+    {
+      "bom_row": 45,
+      "description": "DIN-рейка 7,5см для термостата",
+      "name": "DIN-рейка оцинкованная с перфорацией 7,5см IEK",
+      "unit": "шт",
+      "unit_price_kzt": 160
+    },
+    {
+      "bom_row": 46,
+      "description": "Коммутатор PoE",
+      "name": "Коммутатор DS-3T1310P-SI/HS, Hikvision",
+      "unit": "шт",
+      "unit_price_kzt": 82500
+    },
+    {
+      "bom_row": 47,
+      "description": "Маршрутизатор с PoE питанием для связи с провайдером",
+      "name": "Маршрутизатор hEX S RB760iGS, MikroTik",
+      "unit": "шт",
+      "unit_price_kzt": 37500
+    },
+    {
+      "bom_row": 48,
+      "description": "Наконечники кольцевые изолированные с ПВХ манжетой",
+      "name": "Наконечник кольцевой изолированный НКИ 2,5-8, КВТ",
+      "unit": "шт",
+      "unit_price_kzt": 32
+    },
+    {
+      "bom_row": 49,
+      "description": "Клемма проходная ST 2,5-TWIN",
+      "name": "Клемма многовыводная ST 2,5-TWIN 3031241, Phoenix Contact",
+      "unit": "шт",
+      "unit_price_kzt": 490
+    },
+    {
+      "bom_row": 50,
+      "description": "Торцевая заглушка D-ST 2,5-TWIN",
+      "name": "Заглушка торцевая D-ST 2,5-TWIN 3030488, Phoenix Contact",
+      "unit": "шт",
+      "unit_price_kzt": 250
+    },
+    {
+      "bom_row": 51,
+      "description": "Перемычка для соединения клемм",
+      "name": "Перемычка FBS 2-5 3030161, Phoenix Contact",
+      "unit": "шт",
+      "unit_price_kzt": 225
+    },
+    {
+      "bom_row": 52,
+      "description": "Концевой стопор CLIPFIX 35",
+      "name": "Фиксатор концевой 3022218, Phoenix Contact",
+      "unit": "шт",
+      "unit_price_kzt": 420
+    },
+    {
+      "bom_row": 53,
+      "description": "Бандаж спиральный для укладки проводов",
+      "name": "Бандаж спиральный БСП-8, КВТ",
+      "unit": "м",
+      "unit_price_kzt": 165
+    },
+    {
+      "bom_row": 54,
+      "description": "Радар для измерения скорости ТС",
+      "name": "Traffic Flow Radar TCR300, Nanoradar",
+      "unit": "шт",
+      "unit_price_kzt": 294000
+    },
+    {
+      "bom_row": 55,
+      "description": "MDR-60-12, Блок питания радара, 12B,5A,60Вт",
+      "name": "MDR-60-12, MeanWell",
+      "unit": "шт",
+      "unit_price_kzt": 10000
+    },
+    {
+      "bom_row": 56,
+      "description": "Провод ПВС 2х1,5, для питания радара",
+      "name": "Провод ПВС 2х1,5",
+      "unit": "м",
+      "unit_price_kzt": 313
+    },
+    {
+      "bom_row": 57,
+      "description": "Наконечник НШВИ 1.5-8мм для обжима проводов питания радара",
+      "name": "Наконечник НШВИ 1.5-8мм",
+      "unit": "шт",
+      "unit_price_kzt": 5
+    },
+    {
+      "bom_row": 58,
+      "description": "Самозажимная двусторонняя клемма 222-422 для соединиения разъема питания радара и кабеля ВВГ",
+      "name": "Самозажимная двусторонняя клемма 222-422",
+      "unit": "шт",
+      "unit_price_kzt": 320
+    },
+    {
+      "bom_row": 59,
+      "description": "Штекер 2.1х5.5x10мм с проводом 20см для питания радара",
+      "name": "14-0313, Разъем питания штекер 2.1х5.5x10мм с проводом 20см",
+      "unit": "шт",
+      "unit_price_kzt": 200
+    },
+    {
+      "bom_row": 60,
+      "description": "Мини ПК",
+      "name": "Raspberry Pi 5 4GB",
+      "unit": "шт",
+      "unit_price_kzt": 75000
+    },
+    {
+      "bom_row": 61,
+      "description": "Плата питания PoE",
+      "name": "Power Over Ethernet HAT (F) For Raspberry Pi",
+      "unit": "шт",
+      "unit_price_kzt": 27000
+    },
+    {
+      "bom_row": 62,
+      "description": "Карта памяти 32Гб",
+      "name": "Карта памяти Kingston Industrial microSD",
+      "unit": "шт",
+      "unit_price_kzt": 38000
+    },
+    {
+      "bom_row": 63,
+      "description": "Алюминиевый корпус Мини ПК",
+      "name": "KKSB Raspberry Pi 5 Case - Space for HATs, Add-on Boards, Cooler, and NVMe HATs",
+      "unit": "шт",
+      "unit_price_kzt": 18000
+    },
+    {
+      "bom_row": 64,
+      "description": "Релейный модуль для Мини ПК (4 канала)",
+      "name": "KEYESTUDIO 5V Relay Hat Shield 4-Channel Relay Module for Raspberry Pi 5/4/A+/B+/Pi 2 Model B/Pi 3 Model B/Pi Zero",
+      "unit": "шт",
+      "unit_price_kzt": 9000
+    },
+    {
+      "bom_row": 65,
+      "description": "Латунные стойки для плат",
+      "name": "Латунные стойки для плат М2.5 (папа-мама) М2,5 16мм+6",
+      "unit": "шт",
+      "unit_price_kzt": 150
+    },
+    {
+      "bom_row": 66,
+      "description": "Металлорукав для прокладки кабеля в изоляции 15мм",
+      "name": "Металлорукав «NORD» герметичный в ПВХ-изоляции МРПИнг «NORD»-15, Fortisflex",
+      "unit": "м",
+      "unit_price_kzt": 600
+    },
+    {
+      "bom_row": 67,
+      "description": "Металлорукав для прокладки кабеля в изоляции 20мм",
+      "name": "Металлорукав «NORD» герметичный в ПВХ-изоляции МРПИнг «NORD»-20, Fortisflex",
+      "unit": "м",
+      "unit_price_kzt": 700
+    },
+    {
+      "bom_row": 68,
+      "description": "Фитинг для гофрированной трубы 20 мм для камер",
+      "name": "Муфта вводная ВМ-20 (Fortisflex)",
+      "unit": "шт",
+      "unit_price_kzt": 750
+    },
+    {
+      "bom_row": 69,
+      "description": "Кабель СИП 2х10 для подключения к постоянному электропитанию",
+      "name": "Кабель СИП 2х10",
+      "unit": "м",
+      "unit_price_kzt": 198
+    },
+    {
+      "bom_row": 70,
+      "description": "Зажим анкерный (натяжной) ЗА 1.1 (2х10-25)",
+      "name": "Зажим анкерный (натяжной) ЗА 1.1 2х10-25",
+      "unit": "шт",
+      "unit_price_kzt": 1200
+    },
+    {
+      "bom_row": 71,
+      "description": "Кабель для внешней прокладки UTP cat 5e",
+      "name": "Кабель внешней прокладки/уличный КСВПП-5е 4х2х0,52 Cat 5e",
+      "unit": "м",
+      "unit_price_kzt": 159
+    },
+    {
+      "bom_row": 72,
+      "description": "Бандажная лента для крепления камер",
+      "name": "Лента бандажная 10 мм",
+      "unit": "м",
+      "unit_price_kzt": 206
+    },
+    {
+      "bom_row": 73,
+      "description": "Бандажная лента для крепления шкафа и СИП",
+      "name": "Лента бандажная 20 мм",
+      "unit": "м",
+      "unit_price_kzt": 175
+    },
+    {
+      "bom_row": 74,
+      "description": "Проволока вязальная оцинкованная 1,2мм",
+      "name": "Проволока вязальная оцинкованная 1,2мм",
+      "unit": "кг",
+      "unit_price_kzt": 860
+    },
+    {
+      "bom_row": 75,
+      "description": "Скрепа 10 мм для крепления камер",
+      "name": "Скрепа (бугель) 10 мм NB10",
+      "unit": "шт",
+      "unit_price_kzt": 53
+    },
+    {
+      "bom_row": 76,
+      "description": "Скрепа 20 мм для крепления шкафа и СИП",
+      "name": "Скрепа (бугель) 20 мм HC-20-T",
+      "unit": "шт",
+      "unit_price_kzt": 44
+    },
+    {
+      "bom_row": 77,
+      "description": "Изолента черная ПВХ морозоустойчивая 19мм 130мкм, 20 м",
+      "name": "Изолента черная морозоустойчивая IZ 1920S, Terminator",
+      "unit": "шт",
+      "unit_price_kzt": 525
+    },
+    {
+      "bom_row": 78,
+      "description": "Коннектор RJ 45",
+      "name": "Коннектор RJ-45 cat. 5e UTP 8P8C, SHIP",
+      "unit": "шт",
+      "unit_price_kzt": 25
+    },
+    {
+      "bom_row": 79,
+      "description": "Самоклеящаяся лента - герметик для изоляции",
+      "name": "Самоклеящаяся лента - герметик Nikokrov 20 см*10 м, D-bork",
+      "unit": "рул",
+      "unit_price_kzt": 15800
+    },
+    {
+      "bom_row": 80,
+      "description": "Алюминиевый шильдик на шкаф (основной)",
+      "name": "Шильдик АПК на шкаф с серийным номером",
+      "unit": "шт",
+      "unit_price_kzt": 555
+    },
+    {
+      "bom_row": 81,
+      "description": "Алюминиевый шильдик на шкаф (дополнительный)",
+      "name": "Шильдик на шкаф с серийным номером",
+      "unit": "шт",
+      "unit_price_kzt": 555
+    },
+    {
+      "bom_row": 82,
+      "description": "Наклейки с серийным номерами для оборудования",
+      "name": "Наклейки с серийным номерами для оборудования",
+      "unit": "шт",
+      "unit_price_kzt": null
+    }
+  ]
+}
