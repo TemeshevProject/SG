@@ -1,94 +1,80 @@
 @echo off
 chcp 65001 >nul
 title Kalkulyator APK Sergek
-setlocal
+setlocal EnableExtensions
 
 set "ROOT=%~dp0"
 set "LOG=%ROOT%install-log.txt"
 cd /d "%ROOT%"
 
-echo [%DATE% %TIME%] Start >> "%LOG%"
+echo. > "%LOG%"
+echo [%DATE% %TIME%] START >> "%LOG%"
 
 echo.
 echo  ============================================
-echo    Kalkulyator APK Sergek - ZAPUSK
+echo    Kalkulyator APK Sergek
 echo  ============================================
-echo.
 echo  Papka: %CD%
-echo  Log:   %LOG%
 echo.
 
-REM --- Python ---
 set "PY=python"
-where python >nul 2>&1 || set "PY=py -3"
-where python >nul 2>&1 || where py >nul 2>&1
+where python >nul 2>&1
+if errorlevel 1 set "PY=py -3"
+
+where %PY% >nul 2>&1
 if errorlevel 1 (
-  echo [OSHIBKA] Python ne ustanovlen!
-  echo Ustanovite: https://www.python.org/downloads/
+  echo [OSHIBKA] Net Python. Ustanovite s python.org
   echo Otmette: Add python.exe to PATH
-  echo [OSHIBKA] Python >> "%LOG%"
-  goto :end
+  goto :finish
 )
 echo [OK] Python
-%PY% --version >> "%LOG%" 2>&1
+%PY% --version
 
-REM --- Node ---
 where node >nul 2>&1
 if errorlevel 1 (
-  echo [OSHIBKA] Node.js ne ustanovlen!
-  echo Ustanovite: https://nodejs.org/  ^(LTS^)
-  echo [OSHIBKA] Node >> "%LOG%"
-  goto :end
+  echo [OSHIBKA] Net Node.js. Ustanovite s nodejs.org ^(LTS^)
+  goto :finish
 )
 echo [OK] Node.js
-node --version >> "%LOG%" 2>&1
+node --version
 
-if not exist "backend\app\main.py" (
-  echo [OSHIBKA] Ne ta papka! Net backend\app\main.py
-  goto :end
+if not exist "%ROOT%backend\app\main.py" (
+  echo [OSHIBKA] Zapuskayte START.bat iz papki gde est backend i frontend!
+  goto :finish
 )
 
 echo.
-echo [1/3] Ustanovka Python paketov...
-%PY% -m pip install -r backend\requirements.txt >> "%LOG%" 2>&1
-if errorlevel 1 (
-  echo [OSHIBKA] pip install - sm. install-log.txt
-  goto :end
-)
-echo       Gotovo.
+echo Ustanovka paketov (sm. install-log.txt)...
+%PY% -m pip install -r "%ROOT%backend\requirements.txt" >> "%LOG%" 2>&1
 
-echo [2/3] Ustanovka npm paketov ^(1-3 min^)...
-if not exist "frontend\node_modules\" (
-  cd frontend
+if not exist "%ROOT%frontend\node_modules\" (
+  echo npm install - podozhdite...
+  pushd "%ROOT%frontend"
   call npm install >> "%LOG%" 2>&1
-  if errorlevel 1 (
-    echo [OSHIBKA] npm install - sm. install-log.txt
-    cd ..
-    goto :end
-  )
-  cd ..
+  popd
 )
-echo       Gotovo.
 
-echo [3/3] Zapusk serverov...
 echo.
+echo Otkryvayu okno BACKEND...
+start "APK-Backend" cmd /k call "%ROOT%scripts\run-backend.bat"
 
-start "APK-Backend" cmd /k "cd /d "%ROOT%backend" && set PYTHONPATH=. && %PY% -m uvicorn app.main:app --host 127.0.0.1 --port 8000"
-timeout /t 4 /nobreak >nul
-start "APK-Frontend" cmd /k "cd /d "%ROOT%frontend" && npm run dev -- --host 127.0.0.1 --port 5173"
+timeout /t 2 /nobreak >nul
+
+echo Otkryvayu okno FRONTEND...
+start "APK-Frontend" cmd /k call "%ROOT%scripts\run-frontend.bat"
 
 echo.
 echo  ============================================
-echo    Otkroyte 2 novyh okna: APK-Backend i APK-Frontend
-echo    Podozhdite 20 sekund
-echo    Brauzer:  http://localhost:5173
+echo  Dolzhny otkrytsya 2 okna:
+echo    APK-Backend  i  APK-Frontend
+echo.
+echo  Podozhdite 30 sek, zatem brauzer:
+echo    http://localhost:5173
+echo.
+echo  Esli okon net - zapustite vruchnuyu:
+echo    1-BACKEND.bat  i  2-FRONTEND.bat
 echo  ============================================
-echo.
-echo  Esli ne rabotaet:
-echo  1. Perezapustite etot fayl ot imeni administratora
-echo  2. Peremestite papku v C:\SG  ^(bez kirillicy v puti^)
-echo  3. Prishlite fayl install-log.txt
-echo.
 
-:end
+:finish
+echo.
 pause

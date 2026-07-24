@@ -1,28 +1,43 @@
 @echo off
-chcp 65001 >nul
-title APK Frontend (порт 5173)
-
+title APK Frontend - port 5173
 set "ROOT=%~dp0.."
-cd /d "%ROOT%\frontend"
+cd /d "%ROOT%\frontend" 2>nul
+if errorlevel 1 (
+  echo OSHIBKA: ne naydena papka frontend
+  pause
+  exit /b 1
+)
 
-echo Frontend: %CD%
+echo ========================================
+echo  FRONTEND
+echo  Papka: %CD%
+echo ========================================
 echo.
-echo Не закрывайте это окно!
-echo После запуска откройте: http://localhost:5173
-echo.
+
+where node >nul 2>&1
+if errorlevel 1 (
+  echo OSHIBKA: Node.js ne ustanovlen!
+  echo Skachayte: https://nodejs.org/
+  pause
+  exit /b 1
+)
 
 if not exist "node_modules\" (
-  echo Установка npm-пакетов, подождите...
+  echo npm install - podozhdite 1-3 min...
   call npm install
   if errorlevel 1 (
-    echo ОШИБКА npm install
+    echo OSHIBKA npm install
     pause
     exit /b 1
   )
 )
 
+echo Zapusk na http://localhost:5173
+echo NE ZAKRYVAYTE eto okno!
+echo.
+
 call npm run dev -- --host 127.0.0.1 --port 5173
 
 echo.
-echo Frontend остановлен.
+echo Frontend ostanovlen.
 pause
