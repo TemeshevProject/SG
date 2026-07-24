@@ -1,0 +1,43 @@
+═══════════════════════════════════════════════════════
+  USTANOVKA PYTHON 3.12 (obязatelno для калькулятора)
+═══════════════════════════════════════════════════════
+
+PROBLEMA:
+  U vas Python 3.14 - on slishkom novyy.
+  Pakety uvicorn / pydantic ne ustanavlivayutsya.
+
+RESHENIE:
+  1. Skachayte Python 3.12.10:
+     https://www.python.org/downloads/release/python-31210/
+
+     Vyberite vнизу stranicy:
+     "Windows installer (64-bit)"
+
+  2. Zapustite ustanovshchik.
+
+  3. VNIZU okna otmette GALOCHKU:
+     [x] Add python.exe to PATH
+
+  4. Nazhmite "Install Now"
+
+  5. Perezagruzite kompyuter
+
+  6. Proverka (Win+R -> cmd):
+     py -3.12 --version
+
+     Dolzhno pokazat: Python 3.12.10
+
+  7. Zapustite snova:
+     C:\SG\1-BACKEND.bat
+     C:\SG\2-FRONTEND.bat
+
+  8. Brauzer: http://localhost:5173
+
+═══════════════════════════════════════════════════════
+
+Pochemu ne 3.14?
+  Python 3.14 - eksperimentalnaya versiya.
+  Biblioteki dlya servera eshche ne imeyut gotovyh
+  moduley pod Windows dlya etoy versii.
+
+═══════════════════════════════════════════════════════

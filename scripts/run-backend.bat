@@ -4,27 +4,38 @@ set "ROOT=%~dp0.."
 cd /d "%ROOT%\backend" 2>nul
 if errorlevel 1 (
   echo OSHIBKA: ne naydena papka backend
-  echo %ROOT%\backend
   pause
   exit /b 1
 )
 
+call "%~dp0pick-python.bat"
+if errorlevel 1 exit /b 1
+
 set "PYTHONPATH=."
-set "PYCMD=python"
-where python >nul 2>&1 || set "PYCMD=py -3"
 
 echo ========================================
 echo  BACKEND
 echo  Papka: %CD%
 echo ========================================
 echo.
+%PYCMD% --version
+echo.
 
-echo Ustanovka paketov...
-%PYCMD% -m pip install -r requirements.txt
-if errorlevel 1 echo VNIMANIE: oshibka pip - prodolzhaem...
+echo Ustanovka paketov (pip)...
+%PYCMD% -m pip install --upgrade pip >> "%ROOT%install-log.txt" 2>&1
+%PYCMD% -m pip install -r requirements.txt >> "%ROOT%install-log.txt" 2>&1
+if errorlevel 1 (
+  echo.
+  echo OSHIBKA pip install!
+  echo Skoree vsego ustanovlen Python 3.14 - nuzhen Python 3.12
+  echo Sm. fayl: USTANOVKA-PYTHON.txt
+  echo Log: %ROOT%install-log.txt
+  pause
+  exit /b 1
+)
 
 echo.
-echo Zapusk servera na http://127.0.0.1:8000
+echo Zapusk servera: http://127.0.0.1:8000
 echo NE ZAKRYVAYTE eto okno!
 echo.
 

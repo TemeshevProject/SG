@@ -18,13 +18,12 @@ echo  Papka: %CD%
 echo.
 
 set "PY=python"
-where python >nul 2>&1
-if errorlevel 1 set "PY=py -3"
+call "%ROOT%scripts\pick-python.bat" 2>nul
+if defined PYCMD set "PY=%PYCMD%"
 
 where %PY% >nul 2>&1
 if errorlevel 1 (
-  echo [OSHIBKA] Net Python. Ustanovite s python.org
-  echo Otmette: Add python.exe to PATH
+  echo [OSHIBKA] Net Python 3.12. Sm. USTANOVKA-PYTHON.txt
   goto :finish
 )
 echo [OK] Python
