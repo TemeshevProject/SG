@@ -1,0 +1,9 @@
+{
+  "historical_files": 20,
+  "raw_rows": 1078,
+  "unique_artifacts": 311,
+  "capex": 174,
+  "opex": 137,
+  "with_price": 281,
+  "output": "fem_all_artifacts_prices.xlsx"
+}
