@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 
 import openpyxl
-from openpyxl.styles import Font, PatternFill
+from openpyxl.styles import Alignment, Font, PatternFill
 
 BASE = Path(__file__).resolve().parent
 HIST_DIR = BASE / "historical"
@@ -82,11 +82,45 @@ def pick_price_columns(headers: dict[int, str]) -> list[tuple[int, int]]:
 
 EXCLUDE_NAME = re.compile(
     r"(^итого|^всего|^амортизац|^остаточн|^№\s*п/п$|"
-    r"^наименование\s+показател|^наименование\s+работ$|^фот,?\s*тенге$|"
+    r"^наименование$|^наименование\s+(показател|работ|товара|оборудования|раздела)|"
+    r"^описание$|^товар$|^должность$|^фот,?\s*тенге$|"
     r"инвестиционные\s+затрат|операционные\s+затрат|"
+    r"^техническая\s+спецификация|^расчет\s+общих|"
+    r"^площадь\s+для\s+размещ|^расходы\s+по\s+фот\s+в\s+разрезе|"
+    r"на\s+начало\s+года|на\s+конец\s+года|^кол-?во\s+узлов|"
+    r"^расходы\s+по\s+объекту\s+предназначенному|"
+    r"^\d\.\s*(административно|производственный)\s+персонал|"
     r"^\d+[\.\)]?\s*$|^none$|^\d{4}[\.\-]\d+$)",
     re.I,
 )
+
+# Rows from the "потребность в площадях" blocks: square metres, not money.
+AREA_ROW = re.compile(
+    r"^(зал\s+совещан|гардероб|комната\s+(приема|приёма|отдыха|ожидан)|"
+    r"помещение\s+ожидан|туалет|кладовая)",
+    re.I,
+)
+
+UNIT_TENGE = "тенге"
+UNIT_TENGE_MONTH = "тенге/мес"
+UNIT_THOUSAND_MONTH = "тыс. тенге/мес"
+UNIT_TENGE_YEAR = "тенге/год"
+UNIT_THOUSAND_YEAR = "тыс. тенге/год"
+UNIT_SALARY_MONTH = "тенге/мес (на 1 сотрудника)"
+
+
+def detect_unit(headers: dict[int, str], price_col: int, kind: str) -> str:
+    h = headers.get(price_col, "")
+    thousands = "тыс" in h
+    if "оклад" in h or "зп" in h:
+        return UNIT_SALARY_MONTH
+    if "в год" in h or "год" in h:
+        return UNIT_THOUSAND_YEAR if thousands else UNIT_TENGE_YEAR
+    if "в мес" in h or "мес" in h:
+        return UNIT_THOUSAND_MONTH if thousands else UNIT_TENGE_MONTH
+    if kind == "OPEX":
+        return UNIT_TENGE_MONTH if "цена" in h else UNIT_TENGE
+    return UNIT_TENGE
 
 
 def norm(text) -> str:
@@ -151,40 +185,60 @@ def classify_sheet(sheet_name: str, ws, headers: dict[int, str] | None = None) -
     return None
 
 
-def find_table_header(ws, max_row=40):
-    best = None
-    best_headers = None
-    for r in range(1, max_row + 1):
-        headers = {}
-        for c in range(1, min(ws.max_column, 25) + 1):
-            h = norm(ws.cell(r, c).value)
-            if not h:
-                continue
+def read_header_row(ws, r: int) -> dict[int, str]:
+    headers = {}
+    for c in range(1, min(ws.max_column, 25) + 1):
+        h = norm(ws.cell(r, c).value)
+        if h:
             headers[c] = h
+    return headers
+
+
+def parse_header_row(headers: dict[int, str]):
+    name_col = None
+    for c, h in headers.items():
+        if any(h.startswith(n.strip()) or n.strip() in h for n in NAME_HEADERS):
+            name_col = c
+            break
+    if not name_col:
+        return None
+    price_col = None
+    price_score = -1
+    for c, h in headers.items():
+        if is_qty_header(h):
+            continue
+        for needle, score in PRICE_HEADERS:
+            if needle in h and score > price_score:
+                price_col = c
+                price_score = score
+    if not price_col:
+        return None
+    return name_col, price_col
+
+
+def find_table_blocks(ws, max_scan_rows: int = 400) -> list[dict]:
+    """FEM sheets stack several independent tables, each with its own header row."""
+    blocks = []
+    limit = min(ws.max_row, max_scan_rows)
+    for r in range(1, limit + 1):
+        headers = read_header_row(ws, r)
         if not headers:
             continue
-        name_col = None
-        for c, h in headers.items():
-            if any(h.startswith(n.strip()) or n.strip() in h for n in NAME_HEADERS):
-                name_col = c
-                break
-        if not name_col:
+        parsed = parse_header_row(headers)
+        if not parsed:
             continue
-        price_col = None
-        price_score = -1
-        for c, h in headers.items():
-            if is_qty_header(h):
-                continue
-            for needle, score in PRICE_HEADERS:
-                if needle in h and score > price_score:
-                    price_col = c
-                    price_score = score
-        if price_col:
-            best = (r, name_col, price_col)
-            best_headers = headers
-    if best:
-        return (*best, best_headers)
-    return None
+        name_col, price_col = parsed
+        blocks.append(
+            {
+                "header_row": r,
+                "name_col": name_col,
+                "price_col": price_col,
+                "headers": headers,
+            }
+        )
+    for i, blk in enumerate(blocks):
+        blk["end_row"] = blocks[i + 1]["header_row"] - 1 if i + 1 < len(blocks) else ws.max_row
+    return blocks
 
 
 def is_valid_name(name: str) -> bool:
@@ -192,6 +246,8 @@ def is_valid_name(name: str) -> bool:
         return False
     n = norm(name)
     if EXCLUDE_NAME.search(n):
+        return False
+    if AREA_ROW.match(n):
         return False
     if re.fullmatch(r"[\d\.,\s]+", n):
         return False
@@ -243,28 +299,38 @@ def row_price(
 
 
 def extract_sheet(ws, sheet_name: str, fem_name: str, capex_opex: str | None) -> list[dict]:
-    header = find_table_header(ws)
-    if not header:
-        return []
-    header_row, name_col, price_col, headers = header
-    if not capex_opex:
-        capex_opex = classify_from_headers(headers) or classify_sheet(sheet_name, ws, headers)
-    if not capex_opex:
-        return []
     out = []
-    for r in range(header_row + 1, ws.max_row + 1):
+    for block in find_table_blocks(ws):
+        out.extend(extract_block(ws, block, sheet_name, fem_name, capex_opex))
+    return out
+
+
+def extract_block(ws, block: dict, sheet_name: str, fem_name: str, capex_opex: str | None) -> list[dict]:
+    header_row = block["header_row"]
+    name_col = block["name_col"]
+    price_col = block["price_col"]
+    headers = block["headers"]
+
+    kind = capex_opex or classify_from_headers(headers) or classify_sheet(sheet_name, ws, headers)
+    if not kind:
+        return []
+
+    unit = detect_unit(headers, price_col, kind)
+    out = []
+    for r in range(header_row + 1, block["end_row"] + 1):
         name = ws.cell(r, name_col).value
         if not name:
             continue
         name_s = str(name).strip()
         if not is_valid_name(name_s):
             continue
-        price = row_price(ws, r, name_col, headers, header_row, capex_opex, price_col)
+        price = row_price(ws, r, name_col, headers, header_row, kind, price_col)
         out.append(
             {
-                "type": capex_opex,
+                "type": kind,
                 "name": name_s,
                 "price": price,
+                "unit": unit,
                 "source": f"{fem_name} :: {sheet_name}",
             }
         )
@@ -289,6 +355,200 @@ def extract_workbook(path: Path) -> list[dict]:
     return items
 
 
+# Порядок важен: правила проверяются сверху вниз, первое совпадение выигрывает.
+GROUP_RULES: tuple[tuple[re.Pattern, str, int, str], ...] = (
+    (
+        re.compile(r"директор|менеджер|инжен[ес]р|инденер|бухгалтер|юрист|экономист|специалист|"
+                   r"оператор\b|операторы|аналитик|логист|водитель|секретар|ассистент|техник-|"
+                   r"начальник|заместитель|советник|калибровщик|монтажник|бригадир|"
+                   r"программист|разработчик|администратор|инспектор|грузчик|заведующ|"
+                   r"персонал|\bзп\b|фот\b", re.I),
+        "ФОТ (персонал)",
+        4,
+        "Пересмотр штатного расписания, совмещение ролей, автоматизация рутины, аутсорс непрофильных функций",
+    ),
+    (
+        re.compile(r"билет|проживан|суточн|командиров", re.I),
+        "Командировки",
+        1,
+        "Тревел-политика, корпоративные тарифы, замена части выездов на удалённую работу",
+    ),
+    (
+        re.compile(r"канал\s+(передачи|связи)|каналы\s+связи|интернет|трафик|мбит|провайдер|"
+                   r"точк.\s+подключен|подключен.*канал", re.I),
+        "Каналы связи и интернет",
+        2,
+        "Переторжка с операторами, консолидация трафика, пересмотр скорости канала под фактическую нагрузку",
+    ),
+    (
+        re.compile(r"обслуживан|техническое\s+обслуж|юстировк|чистк|замена\s+модул|"
+                   r"поверк|непредвиденн|ремонт\b", re.I),
+        "Эксплуатация и ТО",
+        3,
+        "Перевод на собственную службу вместо подряда, пересмотр SLA и регламентной периодичности",
+    ),
+    (
+        re.compile(r"ибезопасн|информационн.*безопасн|\bips\b|\bdlp\b|\bsiem\b|фаервол|firewall|"
+                   r"fortigate|ngfw|гтс|испытан.*иб|аттестац", re.I),
+        "Информационная безопасность",
+        5,
+        "Требования регулятора: снижение возможно только через изменение архитектуры и объёма аттестации",
+    ),
+    (
+        re.compile(r"лиценз|vmware|vsphere|veeam|kaspersky|microsoft|windows|подписк|"
+                   r"программное\s+обеспечен|\bvms\b|subscription|license|"
+                   r"поддержка\s+и\s+обновление\s+п", re.I),
+        "Лицензии и ПО",
+        4,
+        "Переход на open-source/отечественные аналоги, пересмотр числа лицензий, перевод perpetual→подписка",
+    ),
+    (
+        # Только работы: названия оборудования часто содержат "...для монтажа".
+        re.compile(r"^(монтаж|настройка|пусконаладк|пуско-наладк|инсталя|строительн|"
+                   r"ремонтно|креплен|навеск|прокладк|логистик|сети\s+электропитан)|"
+                   r"монтажные\s+и\s+инсталя|работы\s+по\s+машзал", re.I),
+        "Монтаж и СМР",
+        3,
+        "Конкурс среди подрядчиков, типовые решения монтажа, укрупнение лотов по географии",
+    ),
+    (
+        re.compile(r"апк|сергек|линейн(ый|ые)\s+участ|перекрест|патруль|трасс", re.I),
+        "АПК «Сергек»",
+        4,
+        "Собственный продукт: удешевление через ревизию спецификации, локализацию сборки и переход на альтернативные комплектующие",
+    ),
+    (
+        re.compile(r"камер|овн\b|варифакальн|фиксированн|поворотн|интеграц|объект\s+размещ|"
+                   r"видеорегистратор|видеонаблюден", re.I),
+        "Камеры ОВН и интеграция",
+        2,
+        "Массовая закупка: тендер, прямой контракт с вендором, отказ от избыточных характеристик",
+    ),
+    (
+        re.compile(r"сервер|схд|система\s+хранения|цод|цоу|рцоу|дата-?центр|серверн|коммутацион|"
+                   r"стойк|шкаф\s+серверн|ибп\b|бесперебойн|дизель|охлажден|фальш|"
+                   r"центр\s+обработки", re.I),
+        "ЦОД и серверное оборудование",
+        3,
+        "Пересмотр запаса мощности, аренда мощностей вместо покупки, вторичный рынок и продление гарантии",
+    ),
+    (
+        re.compile(r"метеостанц|метеодатчик|датчик\s+(pm|качества)", re.I),
+        "Метеостанции и датчики",
+        3,
+        "Выбор менее дорогих моделей датчиков, пересмотр плотности размещения по городу",
+    ),
+    (
+        re.compile(r"аренда\s+помещ|аренда\s+цод|аренда\s+точ|аренда", re.I),
+        "Аренда помещений",
+        2,
+        "Переговоры по ставке, сокращение площадей, релокация в менее дорогую локацию",
+    ),
+    (
+        re.compile(r"электроэнерг|коммунальн|дт\s+для|гсм|топлив", re.I),
+        "Энергия и ГСМ",
+        4,
+        "Тариф регулируется рынком: экономия через энергоэффективность и снижение потребления",
+    ),
+    (
+        re.compile(r"охран|клининг|канц|хоз\.?\s*товар|питьев|диспенсер|"
+                   r"микроволнов|холодильник|уборк", re.I),
+        "Хозяйственные расходы",
+        1,
+        "Тендер среди поставщиков услуг, пересмотр нормативов расхода",
+    ),
+    (
+        re.compile(r"мебель|стол|стул|кресло|тумба|шкаф|сейф|доска\s+магнит", re.I),
+        "Мебель и обстановка",
+        1,
+        "Прямые закупки у производителя, типовая комплектация, отказ от премиального сегмента",
+    ),
+    (
+        re.compile(r"спецовк|перчатк|каска|обувь|дождевик|жилет|желет|очки\s+защ|"
+                   r"страховочн|диэлектрическ|стропы|боты|фонарик|сиз", re.I),
+        "СИЗ и спецодежда",
+        1,
+        "Консолидированная закупка, переход на отечественных производителей",
+    ),
+    (
+        re.compile(r"перфоратор|шуруповерт|дрель|мультиметр|тестер|инструмент|"
+                   r"стремянк|сумка|рюкзак|молоток|нож\s|ключей|пробник|батарея\s+в\s|"
+                   r"зарядное\s+устройств", re.I),
+        "Инструмент и оснастка",
+        2,
+        "Единый поставщик, переход с премиальных брендов на средний сегмент",
+    ),
+    (
+        re.compile(r"ноутбук|компьютер|монитор|мфу|принтер|клавиатур|процессор|"
+                   r"видеокарт|материнск|ssd|dimm|блок\s+питания|корпус|кулер|"
+                   r"jabra|nuc|планшет|рации|рация|радиостанц|ip-?телефон|"
+                   r"wifi|роутер|маршрутизатор|коммутатор|патч|patch|кабел|кабель|sfp|"
+                   r"power\s+cord|transceiver|disk|enclosure|мобильное\s+рабочее|"
+                   r"удлинитель|картридж", re.I),
+        "Рабочие места и ИТ-периферия",
+        2,
+        "Стандартизация конфигураций, корпоративные цены вендоров, увеличение срока службы",
+    ),
+    (
+        re.compile(r"ситуацион|видеостен|панел|арм\b|рабочее\s+место\s+оператор|"
+                   r"видеоконференц|интерактивн", re.I),
+        "Ситуационный центр",
+        3,
+        "Пересмотр состава видеостены и числа АРМ под фактическую нагрузку операторов",
+    ),
+    (
+        re.compile(r"скуд|домофон|замок|турникет|карта\s+доступ|распознаван|"
+                   r"контрол.*доступ|кнопка\s+выхода|доводчик|сигнализац|пожаротуш|"
+                   r"кондиционер|счетчик|аскуэ", re.I),
+        "Инженерные системы объекта",
+        2,
+        "Типовые проектные решения, конкурс подрядчиков, унификация оборудования",
+    ),
+    (
+        re.compile(r"независимая\s+оценка|экспертиз|проектно-изыскат|надзор|"
+                   r"сопровожден|консультац", re.I),
+        "Проектирование и экспертиза",
+        3,
+        "Конкурс среди проектных организаций, повторное использование типовых проектов",
+    ),
+)
+
+DEFAULT_GROUP = ("Прочее", 3, "Требуется ручная классификация и определение рычага снижения")
+
+
+def classify_group(name: str, kind: str) -> tuple[str, int, str]:
+    for pattern, group, score, lever in GROUP_RULES:
+        if pattern.search(name):
+            return group, score, lever
+    return DEFAULT_GROUP
+
+
+COMPLEXITY_LABELS = {
+    1: "1 — низкая",
+    2: "2 — ниже средней",
+    3: "3 — средняя",
+    4: "4 — высокая",
+    5: "5 — очень высокая",
+}
+
+
+def enrich(rows: list[dict]) -> list[dict]:
+    for row in rows:
+        group, score, lever = classify_group(row["name"], row["type"])
+        row["group"] = group
+        row["complexity"] = score
+        row["complexity_label"] = COMPLEXITY_LABELS[score]
+        row["lever"] = lever
+
+        # В части исходных ФЭМ колонки съезжают и вместо цены стоит количество.
+        price = row.get("price")
+        if price is None or price <= 0:
+            row["unit"] = "цена не указана"
+        elif row["type"] == "CAPEX" and price < 1000:
+            row["unit"] = f"{row.get('unit', UNIT_TENGE)} (проверить: похоже на количество)"
+    return rows
+
+
 def dedupe_max_price(items: list[dict]) -> list[dict]:
     buckets: dict[str, list[dict]] = {}
     for it in items:
@@ -307,30 +567,101 @@ def dedupe_max_price(items: list[dict]) -> list[dict]:
     return result
 
 
+HEADERS = [
+    "CAPEX/OPEX",
+    "Группа",
+    "Наименование артефакта",
+    "Цена",
+    "Ед. изм.",
+    "Сложность снижения",
+    "Рычаг снижения цены",
+    "Источник",
+]
+
+COLUMN_WIDTHS = {
+    "A": 12,
+    "B": 30,
+    "C": 62,
+    "D": 16,
+    "E": 22,
+    "F": 20,
+    "G": 62,
+    "H": 52,
+}
+
+COMPLEXITY_FILL = {
+    1: "C6EFCE",
+    2: "DDEBCD",
+    3: "FFEB9C",
+    4: "FCD5B4",
+    5: "FFC7CE",
+}
+
+
+def fill_sheet(ws, data: list[dict]):
+    ws.append(HEADERS)
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill("solid", fgColor="D9E1F2")
+        cell.alignment = Alignment(vertical="center", wrap_text=True)
+
+    for row in data:
+        ws.append(
+            [
+                row["type"],
+                row["group"],
+                row["name"],
+                row["price"],
+                row.get("unit"),
+                row["complexity_label"],
+                row["lever"],
+                row["source"],
+            ]
+        )
+        complexity_cell = ws.cell(ws.max_row, 6)
+        complexity_cell.fill = PatternFill("solid", fgColor=COMPLEXITY_FILL[row["complexity"]])
+        price_cell = ws.cell(ws.max_row, 4)
+        price_cell.number_format = "#,##0.00"
+
+    for col, width in COLUMN_WIDTHS.items():
+        ws.column_dimensions[col].width = width
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = f"A1:H{ws.max_row}"
+
+
+def write_summary(ws, rows: list[dict]):
+    ws.append(["Группа", "CAPEX/OPEX", "Позиций", "Сложность снижения"])
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
+        cell.fill = PatternFill("solid", fgColor="D9E1F2")
+
+    stats: dict[tuple[str, str], dict] = {}
+    for row in rows:
+        key = (row["group"], row["type"])
+        entry = stats.setdefault(key, {"count": 0, "complexity": row["complexity_label"]})
+        entry["count"] += 1
+
+    for (group, kind), entry in sorted(stats.items(), key=lambda x: -x[1]["count"]):
+        ws.append([group, kind, entry["count"], entry["complexity"]])
+
+    ws.column_dimensions["A"].width = 34
+    ws.column_dimensions["B"].width = 14
+    ws.column_dimensions["C"].width = 12
+    ws.column_dimensions["D"].width = 22
+    ws.freeze_panes = "A2"
+
+
 def write_output(rows: list[dict]):
     wb = openpyxl.Workbook()
-    headers = ["CAPEX/OPEX", "Наименование артефакта", "Цена", "Источник"]
-
-    def fill_sheet(ws, data):
-        ws.append(headers)
-        for cell in ws[1]:
-            cell.font = Font(bold=True)
-            cell.fill = PatternFill("solid", fgColor="D9E1F2")
-        for row in data:
-            ws.append([row["type"], row["name"], row["price"], row["source"]])
-        ws.column_dimensions["A"].width = 12
-        ws.column_dimensions["B"].width = 70
-        ws.column_dimensions["C"].width = 18
-        ws.column_dimensions["D"].width = 55
 
     ws_all = wb.active
     ws_all.title = "Все артефакты"
     fill_sheet(ws_all, rows)
 
-    for title, flt in [("CAPEX", "CAPEX"), ("OPEX", "OPEX")]:
-        ws = wb.create_sheet(title)
-        fill_sheet(ws, [r for r in rows if r["type"] == flt])
+    for title in ("CAPEX", "OPEX"):
+        fill_sheet(wb.create_sheet(title), [r for r in rows if r["type"] == title])
 
+    write_summary(wb.create_sheet("Сводка по группам"), rows)
     wb.save(OUTPUT)
 
 
@@ -344,8 +675,14 @@ def main():
         print(f"{path.name}: {len(extracted)} rows")
         raw.extend(extracted)
 
-    deduped = dedupe_max_price(raw)
+    deduped = enrich(dedupe_max_price(raw))
     write_output(deduped)
+
+    by_group: dict[str, int] = {}
+    by_complexity: dict[str, int] = {}
+    for row in deduped:
+        by_group[row["group"]] = by_group.get(row["group"], 0) + 1
+        by_complexity[row["complexity_label"]] = by_complexity.get(row["complexity_label"], 0) + 1
 
     meta = {
         "historical_files": len(list(HIST_DIR.glob("*.xlsx"))),
@@ -354,6 +691,8 @@ def main():
         "capex": sum(1 for r in deduped if r["type"] == "CAPEX"),
         "opex": sum(1 for r in deduped if r["type"] == "OPEX"),
         "with_price": sum(1 for r in deduped if r["price"] is not None and r["price"] > 0),
+        "by_group": dict(sorted(by_group.items(), key=lambda x: -x[1])),
+        "by_complexity": dict(sorted(by_complexity.items())),
         "output": str(OUTPUT.name),
     }
     META.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
